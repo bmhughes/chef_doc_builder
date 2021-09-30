@@ -1,0 +1,13 @@
+# Index
+
+[Back to resource list](../README.md#resources)
+
+## Resources
+
+<% if nil_or_empty_any?(resources) %>
+- None
+<% else %>
+<% resources.each do |r| %>
+- [<%= r['name'] %>](<%= r['path'] %>)
+<% end %>
+<% end %>
