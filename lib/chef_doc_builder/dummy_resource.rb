@@ -1,9 +1,12 @@
 module ChefDocBuilder
   class DummyResource
-    attr_reader :actions, :name, :properties, :unified_mode, :uses
+    attr_reader :actions, :name, :libraries, :properties, :unified_mode, :uses
+
+    INCLUDE_REGEX ||= /^include (?<lib>.*)$/.freeze
 
     def initialize(name)
       @actions = []
+      @libraries = []
       @name = name
       @properties = []
       @unified_mode = nil
@@ -31,6 +34,8 @@ module ChefDocBuilder
 
       file_content = File.read(file)
 
+      # Match the libraries include-ed
+      @libraries.concat(file_content.scan(/^include (?<lib>.*)$/).flatten)
       # Skip (attemping) to load any included libraries
       file_content.gsub!(/^include/, '#include')
 

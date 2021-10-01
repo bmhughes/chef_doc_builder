@@ -95,6 +95,7 @@ resources.each do |resource|
   variables = {
     resource_name: filename.delete_suffix('.md'),
     actions: resource.actions,
+    libraries: resource.libraries,
     properties: resource.properties,
     uses: resource.uses
   }

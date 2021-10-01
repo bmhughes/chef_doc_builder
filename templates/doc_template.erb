@@ -1,12 +1,10 @@
 # <%= resource_name %>
 
 [Back to resource list](../README.md#resources)
+<% unless nil_or_empty_any?(uses) %>
 
 ## Uses
 
-<% if nil_or_empty_any?(uses) %>
-- None
-<% else %>
 <% uses.each do |u| %>
 - [<%= u %>](<%= u %>.md)
 <% end %>
@@ -29,5 +27,13 @@
 <% unless nil_or_empty_any?(properties) %>
 <% properties.each do |p| %>
 |<%= "`#{p[:name]}`".ljust(24) %>|<% if p[:name_property] %><%= "\u2713".encode('utf-8').center(7) %><% end %>|<%= p.fetch(:type, []).join(', ').ljust(24) %>|<%= ''.ljust(34) %>|<%= ''.ljust(50) %>|<%= "#{p.fetch(:equal_to, []).join(', ')}".ljust(22) %>|
+<% end %>
+<% end %>
+<% unless nil_or_empty_any?(libraries) %>
+
+## Libraries
+
+<% libraries.each do |l| %>
+- `<%= l %>`
 <% end %>
 <% end %>
