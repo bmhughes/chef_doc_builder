@@ -41,7 +41,7 @@ module ChefDocBuilder
 
       instance_eval(file_content, File.basename(file), 1)
 
-      true
+      self
     end
 
     def property(name, type = NOT_PASSED, **options)
