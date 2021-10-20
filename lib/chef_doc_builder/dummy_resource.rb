@@ -30,7 +30,7 @@ module ChefDocBuilder
     end
 
     def load_from_file(file)
-      raise unless File.exist?(file) && File.file?(file)
+      raise "File #{file} does not exist" unless File.exist?(file) && File.file?(file)
 
       file_content = File.read(file)
 

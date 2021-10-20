@@ -26,7 +26,7 @@ $options = {
 
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename(__FILE__)} [$options]"
-  
+
   opts.on_head('-h', '--help', 'Prints this help') do
     puts opts
     exit
@@ -49,6 +49,12 @@ optparse = OptionParser.new do |opts|
     end
 
     File.expand_path(d)
+  end
+
+  opts.on('-f File', '--resource-file=File', 'Resource file for single documentation generation') do |r|
+    raise IOError, "File #{File.expand_path(r)} does not exist" unless File.exist?(File.expand_path(r))
+
+    File.expand_path(r)
   end
 
   opts.on('-i File', '--index-template=File', String, 'Index template file (Defaults to templates/doc_index.erb)') do |i|
@@ -93,7 +99,11 @@ end
 
 # Get resource files sans extention
 begin
-  files = Dir.children($options[:"resource-directory"]).filter { |f| File.extname(f).eql?('.rb') }.map { |f| File.basename(f, '.*') }.sort
+  files = if $options[:"resource-file"]
+            Array(File.basename($options[:"resource-file"], '.*'))
+          else
+            Dir.children($options[:"resource-directory"]).filter { |f| File.extname(f).eql?('.rb') }.map { |f| File.basename(f, '.*') }.sort
+          end
 rescue Errno::ENOENT
   $logger.fatal("Unable to open resource directory #{$options[:"resource-directory"]}")
   exit 3
@@ -133,7 +143,7 @@ end
 $logger.info("Wrote #{doc_count} doc files")
 
 # Index
-if File.exist?(File.join($options[:"doc-directory"], 'README.md')) && !$options[:overwrite]
+if (File.exist?(File.join($options[:"doc-directory"], 'README.md')) && !$options[:overwrite]) || $options[:"resource-file"]
   $logger.info("Skip creating README index file as it already exists and overwrite is not set")
 else
   $logger.info("Updating index file for #{doc_count} doc files")
