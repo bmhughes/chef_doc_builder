@@ -8,6 +8,6 @@
 - None
 <% else %>
 <% resources.each do |r| %>
-- [<%= r['name'] %>](<%= r['path'] %>)
+- [<%= r['name'] %>](<%= File.basename(r['path']) %>)
 <% end %>
 <% end %>
