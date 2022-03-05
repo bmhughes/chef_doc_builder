@@ -9,6 +9,14 @@
 - [<%= u %>](<%= u %>.md)
 <% end %>
 <% end %>
+<% unless nil_or_empty_any?(provides) %>
+
+## Provides
+
+<% provides.each do |p| %>
+- :<%= p %>
+<% end %>
+<% end %>
 
 ## Actions
 

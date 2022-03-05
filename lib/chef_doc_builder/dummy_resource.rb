@@ -1,6 +1,6 @@
 module ChefDocBuilder
   class DummyResource
-    attr_reader :actions, :name, :libraries, :properties, :unified_mode, :uses
+    attr_reader :actions, :name, :libraries, :properties, :unified_mode, :uses, :provide
 
     INCLUDE_REGEX ||= /^include (?<lib>.*)$/.freeze
 
@@ -11,6 +11,7 @@ module ChefDocBuilder
       @properties = []
       @unified_mode = nil
       @uses = []
+      @provide = []
     end
 
     def action(arg)
@@ -59,6 +60,10 @@ module ChefDocBuilder
 
     def use(partial)
       @uses.push(partial)
+    end
+
+    def provides(partial)
+      @provide.push(partial)
     end
   end
 end
