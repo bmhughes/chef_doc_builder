@@ -1,6 +1,14 @@
 # <%= resource_name %>
 
 [Back to resource list](../README.md#resources)
+<% unless nil_or_empty_any?(requires) %>
+
+## Requires
+
+<% requires.each do |r| %>
+- `<%= r %>`
+<% end %>
+<% end %>
 <% unless nil_or_empty_any?(uses) %>
 
 ## Uses

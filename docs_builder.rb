@@ -133,6 +133,7 @@ resources.each do |resource|
     properties: resource.properties,
     uses: resource.uses,
     provides: resource.provide,
+    requires: resource.requires,
   }
   $logger.debug("Write file vars #{variables}")
 
