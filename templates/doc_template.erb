@@ -49,7 +49,7 @@
 
 ## Libraries
 
-<% libraries.each do |l| %>
+<% libraries.uniq.each do |l| %>
 - `<%= l %>`
 <% end %>
 <% end %>

@@ -37,7 +37,7 @@ module ChefDocBuilder
       file_content = File.read(file)
 
       # Match the libraries include-ed
-      @libraries.concat(file_content.scan(/^include (?<lib>.*)$/).flatten)
+      @libraries.concat(file_content.scan(/^(\s+)?include (?<lib>.*)$/).flatten)
       # Skip (attemping) to load any included libraries
       file_content.gsub!(/^include/, '#include')
 
