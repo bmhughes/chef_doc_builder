@@ -1,0 +1,60 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.1
+
+Metrics/AbcSize:
+  Exclude:
+    - '**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - '**/*'
+
+Metrics/BlockNesting:
+  Exclude:
+    - '**/*'
+
+Metrics/ClassLength:
+  Exclude:
+    - '**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Layout/LineLength:
+  Exclude:
+    - '**/*'
+
+Metrics/MethodLength:
+  Max: 20000
+  Exclude:
+    - '**/*'
+
+Metrics/ModuleLength:
+  Max: 20000
+  Exclude:
+    - '**/*'
+
+Metrics/PerceivedComplexity:
+  Max: 30
+
+Style/FrozenStringLiteralComment:
+  EnforcedStyle: never
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: '()'
+    '%i': '()'
+    '%w': '()'
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma

@@ -4,6 +4,7 @@ require 'erb'
 require 'fileutils'
 require 'logger'
 require 'optparse'
+require 'English'
 
 require_relative 'lib/chef_doc_builder'
 
@@ -14,18 +15,18 @@ def nil_or_empty_any?(*values)
 end
 
 # Note - These are escaped Symbol, not String as optparse returns key names with dashes
-$options = {
-  "doc-directory": nil,
-  "log-level": Logger::Severity::INFO,
-  "template-file": "#{__dir__}/templates/doc_template.erb",
-  "template-index-file": "#{__dir__}/templates/doc_index.erb",
-  "cookbook-prefix": Dir.pwd.split('/').last,
-  "resource-directory": "#{Dir.pwd}/resources",
-  "overwrite": false,
+options = {
+  'doc-directory': nil,
+  'log-level': Logger::Severity::INFO,
+  'template-file': "#{__dir__}/templates/doc_template.erb",
+  'template-index-file': "#{__dir__}/templates/doc_index.erb",
+  'cookbook-prefix': Dir.pwd.split('/').last,
+  'resource-directory': "#{Dir.pwd}/resources",
+  overwrite: false,
 }
 
 optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename(__FILE__)} [$options]"
+  opts.banner = "Usage: #{File.basename(__FILE__)} [options]"
 
   opts.on_head('-h', '--help', 'Prints this help') do
     puts opts
@@ -39,12 +40,12 @@ optparse = OptionParser.new do |opts|
     exit
   end
 
-  opts.separator("")
-  opts.separator "Docs builder options:"
+  opts.separator('')
+  opts.separator 'Docs builder options:'
 
   opts.on('-d DIR', '--doc-directory=DIR', String, :REQUIRED, 'Documentation directory (Required)') do |d|
     if nil_or_empty_any?(File.expand_path(d))
-      $logger.fatal("Unable to expand the supplied documentation directory #{d}!")
+      logger.fatal("Unable to expand the supplied documentation directory #{d}!")
       exit 2
     end
 
@@ -79,52 +80,52 @@ optparse = OptionParser.new do |opts|
   end
 end
 
-optparse.parse!(into: $options)
+optparse.parse!(into: options)
 
-$logger = Logger.new($stdout, level: $options[:"log-level"], progname: File.basename(__FILE__))
+logger = Logger.new($stdout, level: options[:'log-level'], progname: File.basename(__FILE__))
 
 # Check for required options
 begin
-  $logger.debug("Parsed options: \n#{$options}")
+  logger.debug("Parsed options: \n#{options}")
 
-  missing_opts = %i(doc-directory).filter { |o| nil_or_empty_any?($options.fetch(o, nil)) }
-  $logger.debug("Found missing options: #{missing_opts.join(', ')}")
+  missing_opts = [:'doc-directory'].filter { |o| nil_or_empty_any?(options.fetch(o, nil)) }
+  logger.debug("Found missing options: #{missing_opts.join(', ')}")
 
-  raise OptionParser::MissingArgument.new(missing_opts.join(', ')) unless missing_opts.empty?
+  raise OptionParser::MissingArgument, missing_opts.join(', ') unless missing_opts.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
-  $logger.fatal($!.to_s)
+  logger.fatal($ERROR_INFO.to_s)
   puts("\n#{optparse}\n")
   exit 1
 end
 
 # Get resource files sans extention
 begin
-  files = if $options[:"resource-file"]
-            Array(File.basename($options[:"resource-file"], '.*'))
+  files = if options[:'resource-file']
+            Array(File.basename(options[:'resource-file'], '.*'))
           else
-            Dir.children($options[:"resource-directory"]).filter { |f| File.extname(f).eql?('.rb') }.map { |f| File.basename(f, '.*') }.sort
+            Dir.children(options[:'resource-directory']).filter { |f| File.extname(f).eql?('.rb') }.map { |f| File.basename(f, '.*') }.sort
           end
 rescue Errno::ENOENT
-  $logger.fatal("Unable to open resource directory #{$options[:"resource-directory"]}")
+  logger.fatal("Unable to open resource directory #{options[:'resource-directory']}")
   exit 3
 end
 
 # Build dummy resources
-$logger.info("Building dummy resources from #{files.count} custom resource definitions")
-resources = files.map { |rf| ChefDocBuilder::DummyResource.new("#{$options[:"cookbook-prefix"]}_#{rf}").load_from_file("#{$options[:"resource-directory"]}/#{rf}.rb") }
+logger.info("Building dummy resources from #{files.count} custom resource definitions")
+resources = files.map { |rf| ChefDocBuilder::DummyResource.new("#{options[:'cookbook-prefix']}_#{rf}").load_from_file("#{options[:'resource-directory']}/#{rf}.rb") }
 
 # Render Templates
-FileUtils.mkdir_p($options[:"doc-directory"]) unless Dir.exist?($options[:"doc-directory"])
+FileUtils.mkdir_p(options[:'doc-directory'])
 doc_count = 0
 
 resources.each do |resource|
   filename = "#{resource.name}.md"
-  if File.exist?(File.join($options[:"doc-directory"], filename)) && !$options[:overwrite]
-    $logger.info("Skip creating doc file #{filename} as it already exists and overwrite is not set")
+  if File.exist?(File.join(options[:'doc-directory'], filename)) && !options[:overwrite]
+    logger.info("Skip creating doc file #{filename} as it already exists and overwrite is not set")
     next
   end
 
-  $logger.info("Write file #{filename}")
+  logger.info("Write file #{filename}")
 
   variables = {
     resource_name: filename.delete_suffix('.md'),
@@ -135,25 +136,25 @@ resources.each do |resource|
     provides: resource.provide,
     requires: resource.requires,
   }
-  $logger.debug("Write file vars #{variables}")
+  logger.debug("Write file vars #{variables}")
 
-  file_content = ERB.new(File.read($options[:"template-file"]), trim_mode: '<>').result_with_hash(variables)
-  File.write(File.join($options[:"doc-directory"], filename), file_content)
+  file_content = ERB.new(File.read(options[:'template-file']), trim_mode: '<>').result_with_hash(variables)
+  File.write(File.join(options[:'doc-directory'], filename), file_content)
   doc_count += 1
 end
 
-$logger.info("Wrote #{doc_count} doc files")
+logger.info("Wrote #{doc_count} doc files")
 
 # Index
-if (File.exist?(File.join($options[:"doc-directory"], 'README.md')) && !$options[:overwrite]) || $options[:"resource-file"]
-  $logger.info("Skip creating README index file as it already exists and overwrite is not set")
+if (File.exist?(File.join(options[:'doc-directory'], 'README.md')) && !options[:overwrite]) || options[:'resource-file']
+  logger.info('Skip creating README index file as it already exists and overwrite is not set')
 else
-  $logger.info("Updating index file for #{doc_count} doc files")
+  logger.info("Updating index file for #{doc_count} doc files")
   variables = {}
   variables['resources'] = files.map do |file|
-                             { 'name' => "#{$options[:"cookbook-prefix"]}_#{file}", 'path' => File.join($options[:"doc-directory"], "#{$options[:"cookbook-prefix"]}_#{file}.md") }
-                           end
+    { 'name' => "#{options[:'cookbook-prefix']}_#{file}", 'path' => File.join(options[:'doc-directory'], "#{options[:'cookbook-prefix']}_#{file}.md") }
+  end
 
-  file_content = ERB.new(File.read($options[:"template-index-file"]), trim_mode: '<>').result_with_hash(variables)
-  File.write(File.join($options[:"doc-directory"], 'README.md'), file_content)
+  file_content = ERB.new(File.read(options[:'template-index-file']), trim_mode: '<>').result_with_hash(variables)
+  File.write(File.join(options[:'doc-directory'], 'README.md'), file_content)
 end
