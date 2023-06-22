@@ -1,8 +1,10 @@
 module ChefDocBuilder
+  # Class to gather information from a custom resource
   class DummyResource
     attr_reader :actions, :name, :libraries, :properties, :uses, :provide, :requires
 
-    INCLUDE_REGEX ||= /^include (?<lib>.*)$/.freeze
+    INCLUDE_REGEX = /^include (?<lib>.*)$/
+    private_constant :INCLUDE_REGEX
 
     def initialize(name)
       @actions = []
@@ -19,15 +21,15 @@ module ChefDocBuilder
       @actions.push(arg)
     end
 
-    def action_class(_block)
+    def action_class
       nil
     end
 
-    def lazy(_block)
+    def lazy
       nil
     end
 
-    def load_current_value(_block)
+    def load_current_value
       nil
     end
 
@@ -48,7 +50,7 @@ module ChefDocBuilder
 
     def property(name, type = NOT_PASSED, **options)
       property_hash = {
-        name: name,
+        name:,
         type: Array(type),
       }.merge(options)
 
